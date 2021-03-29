@@ -69,30 +69,36 @@ ROS3D.MarkerClient.prototype.subscribe = function(){
 };
 
 ROS3D.MarkerClient.prototype.processMessage = function(message){
-  // remove old marker from Three.Object3D children buffer
-  var oldNode = this.markers[message.ns + message.id];
-  this.updatedTime[message.ns + message.id] = new Date().getTime();
-  if (oldNode) {
-    this.removeMarker(message.ns + message.id);
+  if (message.action === 3) {
+    // "DELETEALL"
+    for (const key of Object.keys(this.markers)) {
+      this.removeMarker(key);
+    }
+  } else {
+    // remove old marker from Three.Object3D children buffer
+    var oldNode = this.markers[message.ns + message.id];
+    this.updatedTime[message.ns + message.id] = new Date().getTime();
+    if (oldNode) {
+      this.removeMarker(message.ns + message.id);
 
-  } else if (this.lifetime) {
-    this.checkTime(message.ns + message.id);
+    } else if (this.lifetime) {
+      this.checkTime(message.ns + message.id);
+    }
+
+    if (message.action === 0) {  // "ADD" or "MODIFY"
+      var newMarker = new ROS3D.Marker({
+        message : message,
+        path : this.path,
+      });
+
+      this.markers[message.ns + message.id] = new ROS3D.SceneNode({
+        frameID : message.header.frame_id,
+        tfClient : this.tfClient,
+        object : newMarker
+      });
+      this.rootObject.add(this.markers[message.ns + message.id]);
+    }
   }
-
-  if (message.action === 0) {  // "ADD" or "MODIFY"
-    var newMarker = new ROS3D.Marker({
-      message : message,
-      path : this.path,
-    });
-
-    this.markers[message.ns + message.id] = new ROS3D.SceneNode({
-      frameID : message.header.frame_id,
-      tfClient : this.tfClient,
-      object : newMarker
-    });
-    this.rootObject.add(this.markers[message.ns + message.id]);
-  }
-
   this.emit('change');
 };
 
@@ -107,4 +113,5 @@ ROS3D.MarkerClient.prototype.removeMarker = function(key) {
     child.dispose();
   });
   delete(this.markers[key]);
+  delete(this.updatedTime[key]);
 };
