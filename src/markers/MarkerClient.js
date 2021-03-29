@@ -69,11 +69,8 @@ ROS3D.MarkerClient.prototype.subscribe = function(){
 };
 
 ROS3D.MarkerClient.prototype.processMessage = function(message){
-  if (message.action === 3) {
-    // "DELETEALL"
-    for (const key of Object.keys(this.markers)) {
-      this.removeMarker(key);
-    }
+  if (message.action === 3) {  // "DELETEALL"
+    Object.keys(this.markers).forEach(key => this.removeMarker(key));
   } else {
     // remove old marker from Three.Object3D children buffer
     var oldNode = this.markers[message.ns + message.id];
