@@ -56888,6 +56888,7 @@ var Viewer = function Viewer(options) {
   var background = options.background || '#111111';
   var antialias = options.antialias;
   var intensity = options.intensity || 0.66;
+  var lightFollowsCamera = options.lightFollowsCamera || false;
   var near = options.near || 0.01;
   var far = options.far || 1000;
   var alpha = options.alpha || 1.0;
@@ -56931,7 +56932,7 @@ var Viewer = function Viewer(options) {
   // lights
   this.scene.add(new THREE$1.AmbientLight(0x555555));
   this.directionalLight = new THREE$1.DirectionalLight(0xffffff, intensity);
-  this.scene.add(this.directionalLight);
+  lightFollowsCamera ? this.camera.add(this.directionalLight) : this.scene.add(this.directionalLight);
 
   // propagates mouse events to three.js objects
   this.selectableObjects = new THREE$1.Group();
