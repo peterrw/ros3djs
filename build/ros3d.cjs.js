@@ -56936,7 +56936,12 @@ var Viewer = function Viewer(options) {
   // lights
   this.scene.add(new THREE$1.AmbientLight(0x555555));
   this.directionalLight = new THREE$1.DirectionalLight(0xffffff, intensity);
-  lightFollowsCamera ? this.camera.add(this.directionalLight) : this.scene.add(this.directionalLight);
+  if (lightFollowsCamera) {
+    this.camera.add(this.directionalLight);
+    this.scene.add( this.camera );
+  } else {
+    this.scene.add(this.directionalLight);
+  }
 
   // propagates mouse events to three.js objects
   this.selectableObjects = new THREE$1.Group();
